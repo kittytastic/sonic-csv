@@ -4,12 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-
+memchr = { version = "2.7.4" }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 rand = "0.7.3"
 rand_chacha = "0.3.1"
+
+[profile.release]
+lto = true
 
 [[bench]]
 name = "basic"

@@ -492,6 +492,7 @@ name = "sonic-csv"
 version = "0.1.0"
 dependencies = [
  "criterion",
+ "memchr",
  "rand",
  "rand_chacha 0.3.1",
 ]

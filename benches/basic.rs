@@ -5,6 +5,7 @@ use rand_chacha::rand_core::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use std::fmt::Write;
 use sonic_csv::csv::CsvCursor;
+use sonic_csv::csv_simd::CsvSimdCursor;
 
 fn gen_csv_data() -> String {
     //let mut rng = ChaCha8Rng::seed_from_u64(2);
@@ -41,9 +42,23 @@ fn read_all_csv(csv: &str)->u64{
     cell_count
 }
 
+fn read_all_csv_simd(csv: &str)->u64{
+    let mut c = CsvSimdCursor::new(csv.as_bytes());
+    let mut finished = false;
+    let mut cell_count = 0;
+    while !finished {
+        while let Some(_) = c.next_value(){
+            cell_count += 1;
+        }
+        finished = !c.advance_line();
+    }
+    cell_count
+}
+
 fn simple_data_benchmark(c: &mut Criterion) {
     let d = gen_csv_data();
     c.bench_function("Read CSV", |b| b.iter(|| read_all_csv(black_box(d.as_str()))));
+    c.bench_function("Read SIMD CSV", |b| b.iter(|| read_all_csv_simd(black_box(d.as_str()))));
 }
 
 
