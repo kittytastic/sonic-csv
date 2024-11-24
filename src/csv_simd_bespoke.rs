@@ -1,8 +1,11 @@
 use memchr::memchr3;
-
+// Compare bytes: __m128i _mm_cmpeq_epi8 (__m128i a, __m128i b)
+// https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#ssetechs=SSE,SSE2,SSE3,SSSE3,SSE4_1,SSE4_2&ig_expand=919,921,922,920,876&text=cmp
+//All zero: int _mm_test_all_zeros (__m128i mask, __m128i a)
+// __int64 _mm_extract_epi64
 
 #[derive(Debug, Clone)]
-pub struct CsvSimdBespokeCursor<'a> {
+pub struct CsvSimdCursor<'a> {
     file_bytes: &'a[u8],
     cursor_pos: usize,
     eol: bool,
@@ -14,9 +17,9 @@ const NEWLINE:u8 = b'\n';
 const RETURN_CARRIAGE:u8 = b'\r'; // Windows sucks
 const COMMA:u8 = b',';
 
-impl<'a> CsvSimdBespokeCursor<'a>{
-    pub fn new(file_bytes: &[u8])->CsvSimdBespokeCursor<'_>{
-        CsvSimdBespokeCursor {
+impl<'a> CsvSimdCursor<'a>{
+    pub fn new(file_bytes: &[u8])->CsvSimdCursor<'_>{
+        CsvSimdCursor {
             file_bytes: file_bytes,
             cursor_pos: 0,
             eol: false,
@@ -139,7 +142,7 @@ mod tests {
     fn next_val() {
         let file = "hi,hello\nlater,bye";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.next_value(), Some("hi".as_bytes()));
         assert_eq!(c.next_value(), Some("hello".as_bytes()));
         assert_eq!(c.next_value(), None);
@@ -150,7 +153,7 @@ mod tests {
     fn next_val_2() {
         let file = ",\n";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.next_value(), None);
@@ -161,7 +164,7 @@ mod tests {
     fn next_line() {
         let file = "hi,hello\nlater,bye";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.advance_line(), true);
         assert_eq!(c.advance_line(), false);
         assert_eq!(c.advance_line(), false);
@@ -171,7 +174,7 @@ mod tests {
     fn next_line_2() {
         let file = "\n\n";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.advance_line(), true);
         assert_eq!(c.advance_line(), true);
         assert_eq!(c.advance_line(), false);
@@ -182,7 +185,7 @@ mod tests {
     fn read_file() {
         let file = "hi,hello\nlater,bye";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.next_value(), Some("hi".as_bytes()));
         assert_eq!(c.next_value(), Some("hello".as_bytes()));
         assert_eq!(c.next_value(), None);
@@ -197,7 +200,7 @@ mod tests {
     fn eof_thrash() {
         let file = ",";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.advance_line(), false);
@@ -210,7 +213,7 @@ mod tests {
     fn empty_file() {
         let file = "";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.advance_line(), false);
     }
@@ -219,7 +222,7 @@ mod tests {
     fn get_value() {
         let file = "0,1,2,3,4,5";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdBespokeCursor::new(bytes);
+        let mut  c = CsvSimdCursor::new(bytes);
         assert_eq!(c.get_value(1), Some("1".as_bytes()));
         assert_eq!(c.get_value(3), Some("3".as_bytes()));
         assert_eq!(c.get_value(2), None);

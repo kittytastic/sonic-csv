@@ -1,5 +1,7 @@
 pub mod csv;
 pub mod csv_simd;
+pub mod csv_simd_bespoke;
+mod simd_read;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
