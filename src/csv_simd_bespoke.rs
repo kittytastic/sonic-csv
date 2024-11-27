@@ -2,7 +2,7 @@
 use super::simd_read::search_char;
 
 #[derive(Debug, Clone)]
-pub struct CsvSimdCursor<'a> {
+pub struct CsvSimdBespokeCursor<'a> {
     file_bytes: &'a[u8],
     cursor_pos: usize,
     eol: bool,
@@ -14,9 +14,9 @@ const NEWLINE:u8 = b'\n';
 const RETURN_CARRIAGE:u8 = b'\r'; // Windows sucks
 const COMMA:u8 = b',';
 
-impl<'a> CsvSimdCursor<'a>{
-    pub fn new(file_bytes: &[u8])->CsvSimdCursor<'_>{
-        CsvSimdCursor {
+impl<'a> CsvSimdBespokeCursor<'a>{
+    pub fn new(file_bytes: &[u8])->CsvSimdBespokeCursor<'_>{
+        CsvSimdBespokeCursor {
             file_bytes: file_bytes,
             cursor_pos: 0,
             eol: false,
@@ -139,7 +139,7 @@ mod tests {
     fn next_val() {
         let file = "hi,hello\nlater,bye";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.next_value(), Some("hi".as_bytes()));
         assert_eq!(c.next_value(), Some("hello".as_bytes()));
         assert_eq!(c.next_value(), None);
@@ -150,7 +150,7 @@ mod tests {
     fn next_val_2() {
         let file = ",\n";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.next_value(), None);
@@ -161,7 +161,7 @@ mod tests {
     fn next_line() {
         let file = "hi,hello\nlater,bye";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.advance_line(), true);
         assert_eq!(c.advance_line(), false);
         assert_eq!(c.advance_line(), false);
@@ -171,7 +171,7 @@ mod tests {
     fn next_line_2() {
         let file = "\n\n";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.advance_line(), true);
         assert_eq!(c.advance_line(), true);
         assert_eq!(c.advance_line(), false);
@@ -182,7 +182,7 @@ mod tests {
     fn read_file() {
         let file = "hi,hello\nlater,bye";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.next_value(), Some("hi".as_bytes()));
         assert_eq!(c.next_value(), Some("hello".as_bytes()));
         assert_eq!(c.next_value(), None);
@@ -197,7 +197,7 @@ mod tests {
     fn eof_thrash() {
         let file = ",";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.advance_line(), false);
@@ -210,7 +210,7 @@ mod tests {
     fn empty_file() {
         let file = "";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.next_value(), Some("".as_bytes()));
         assert_eq!(c.advance_line(), false);
     }
@@ -219,7 +219,7 @@ mod tests {
     fn get_value() {
         let file = "0,1,2,3,4,5";
         let bytes = file.as_bytes();
-        let mut  c = CsvSimdCursor::new(bytes);
+        let mut  c = CsvSimdBespokeCursor::new(bytes);
         assert_eq!(c.get_value(1), Some("1".as_bytes()));
         assert_eq!(c.get_value(3), Some("3".as_bytes()));
         assert_eq!(c.get_value(2), None);
