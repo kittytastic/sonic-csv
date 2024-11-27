@@ -44,31 +44,31 @@ unsafe fn search_simd_2(needle1 :u8, needle2: u8, mut haystack: &[u8]) -> Option
     let simd_a = _mm_set1_epi8(needle1 as i8);
     let simd_b = _mm_set1_epi8(needle2 as i8);
 
-    print_reg!("Comma: ", simd_a);
-    print_reg!("Newline: ", simd_b);
+    //print_reg!("Comma: ", simd_a);
+    //print_reg!("Newline: ", simd_b);
 
     while haystack.len() >= 16 {
-        println!("Loop 1");
+        //println!("Loop 1");
         let haystack_reg = _mm_loadu_si128(haystack.as_ptr() as *const _); // SEE2
         //let haystack_reg = _mm_load_si128(src.as_ptr() as *const _); // Load aligned
 
-        print_reg!("Haystack", haystack_reg);
+        //print_reg!("Haystack", haystack_reg);
 
         let has_comma = _mm_cmpeq_epi8(haystack_reg, simd_a); // SEE2
         let has_newline = _mm_cmpeq_epi8(haystack_reg, simd_b); // SEE2
         let has_comma_or_newline = _mm_or_si128(has_comma, has_newline); // SEE2
 
-        print_reg!("Match", has_comma_or_newline);
+        //print_reg!("Match", has_comma_or_newline);
         
         let low = _mm_extract_epi64::<0>(has_comma_or_newline);
         let high = _mm_extract_epi64::<1>(has_comma_or_newline);
-        println!("{:x} {:x}", high, low);
+        //println!("{:x} {:x}", high, low);
 
 
         let match_summary = _mm_movemask_epi8(has_comma_or_newline);
-        println!("Match summary: {:b}", match_summary);
+        //println!("Match summary: {:b}", match_summary);
         let first_match_idx = match_summary.trailing_zeros();
-        println!("Idx: {}", first_match_idx);
+        //println!("Idx: {}", first_match_idx);
 
         if first_match_idx < i32::BITS {
             return Some(offset + usize::try_from(first_match_idx).unwrap());

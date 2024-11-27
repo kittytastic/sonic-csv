@@ -29,6 +29,29 @@ fn gen_csv_data() -> String {
     output
 }
 
+
+fn gen_csv_data_wide() -> String {
+    //let mut rng = ChaCha8Rng::seed_from_u64(2);
+
+    let mut output = String::new();
+    let height = 2000;
+    let width = 1000;
+    for i in 0..height{
+        let mut first = false;
+        for j in 0..width{
+            let val = i*height + j;
+            if !first {
+                write!(&mut output, ",").expect("");
+            }
+            write!(&mut output, "aaaaaaaaaaaaaaaaaaaa").expect("");
+            first = false;
+        }
+        write!(&mut output, "\r\n").expect("");
+    }
+    
+    output
+}
+
 fn read_all_csv(csv: &str)->u64{
     let mut c = CsvCursor::new(csv.as_bytes());
     let mut finished = false;
@@ -59,6 +82,10 @@ fn simple_data_benchmark(c: &mut Criterion) {
     let d = gen_csv_data();
     c.bench_function("Read CSV", |b| b.iter(|| read_all_csv(black_box(d.as_str()))));
     c.bench_function("Read SIMD CSV", |b| b.iter(|| read_all_csv_simd(black_box(d.as_str()))));
+    
+    let e = gen_csv_data_wide();
+    c.bench_function("Read CSV - wide", |b| b.iter(|| read_all_csv(black_box(e.as_str()))));
+    c.bench_function("Read SIMD CSV - wide", |b| b.iter(|| read_all_csv_simd(black_box(e.as_str()))));
 }
 
 

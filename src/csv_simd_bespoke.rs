@@ -1,8 +1,5 @@
-use memchr::memchr3;
-// Compare bytes: __m128i _mm_cmpeq_epi8 (__m128i a, __m128i b)
-// https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#ssetechs=SSE,SSE2,SSE3,SSSE3,SSE4_1,SSE4_2&ig_expand=919,921,922,920,876&text=cmp
-//All zero: int _mm_test_all_zeros (__m128i mask, __m128i a)
-// __int64 _mm_extract_epi64
+//use memchr::memchr3;
+use super::simd_read::search_char;
 
 #[derive(Debug, Clone)]
 pub struct CsvSimdCursor<'a> {
@@ -31,7 +28,7 @@ impl<'a> CsvSimdCursor<'a>{
     pub fn next_value(&mut self)->Option<&'a[u8]>{
         if self.eol {return None}
         let todo_lazy = &self.file_bytes[self.cursor_pos..];
-        let next_point = memchr3(COMMA, NEWLINE, RETURN_CARRIAGE, &todo_lazy);
+        let next_point = search_char(&todo_lazy);
         if let Some(val) = next_point{
         let current_byte = todo_lazy[val];
         let new_pos = self.cursor_pos + val;
