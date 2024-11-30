@@ -39,15 +39,16 @@ impl<'a> CsvSimdBespokeCursor<'a>{
             return Some(value_bytes)
         }
         
-        if current_byte == RETURN_CARRIAGE {
+        /*if current_byte == RETURN_CARRIAGE {
             let value_bytes = &self.file_bytes[self.cursor_pos..new_pos];
             self.cursor_pos = new_pos+2; // skip \r\n
             self.eol = true; 
             self.next_val_idx += 1;
             return Some(value_bytes)
-        }
+        }*/
         
         if current_byte == NEWLINE {
+            // TODO peek back for \r
             let value_bytes = &self.file_bytes[self.cursor_pos..new_pos];
             self.cursor_pos = new_pos+1; // skip \n
             self.next_val_idx += 1;
